@@ -31,7 +31,18 @@ renderPlayScreen (w,h) ({player} as scene) =
      div
        []
        [ renderPlayer windowSize player
+       , renderSvg windowSize scene
        , renderTransparentJumpButton windowSize ]
+
+
+renderAnnouncement : (Int,Int) -> Maybe Announcement -> Html Msg
+renderAnnouncement windowSize announcement =
+  case announcement of
+    Nothing ->
+      div [] []
+
+    Just {text} ->
+      textOnCow windowSize text
 
 
 renderTransparentJumpButton : (Int,Int) -> Html.Html Msg
@@ -41,6 +52,12 @@ renderTransparentJumpButton (w,h) =
     , class "jumpbutton" ]
     []
 
+
+renderSvg : (Int,Int) -> Scene -> Html Msg
+renderSvg windowSize scene =
+  Svg.svg
+    (svgAttributes windowSize)
+    [ renderAnnouncement windowSize scene.announcement ]
 
 svgAttributes : (Int, Int) -> List (Attribute Msg)
 svgAttributes (w, h) =
@@ -85,20 +102,8 @@ renderImageFixedPosition url x y width height =
       Html.img [ srcAttr, style ] []
 
 
--- renderScore : (Int,Int) -> Int -> Int -> Svg Msg
--- renderScore (w,h) p1score p2score =
---   let
---       txt = (toString p1score) ++ "  :  " ++ (toString p2score)
---   in
---       renderTextLine (w//2) (h//5) ((normalFontSize w h)*2) "middle" txt []
-
-
-softWhite : String
-softWhite = "rgba(255,255,255,.5)"
-
-
-mediumWhite : String
-mediumWhite = "rgba(255,255,255,.8)"
+normalTextColor : String
+normalTextColor = "rgba(0,0,0,.9)"
 
 
 normalFontFamily : String
@@ -116,20 +121,9 @@ normalLineHeight w h =
   (toFloat (normalFontSize w h)) * 1.38 |> floor
 
 
-largeText : Int -> Int -> Int -> String -> Svg Msg
-largeText w h y str =
-  renderTextLine (w//2) y ((normalFontSize w h)*2) "middle" str []
-
-
-smallText : Int -> Int -> Int -> String -> Svg Msg
-smallText w h y str =
-  renderTextLine (w//2) y (normalFontSize w h) "middle" str []
-
-
-renderTextParagraph : Int -> Int -> Int -> String -> List String -> List (Svg.Attribute Msg) -> Svg Msg
-renderTextParagraph xPos yPos fontSize anchor lines extraAttrs =
-  List.indexedMap (\index line -> renderTextLine xPos (yPos+index*fontSize*5//4) fontSize anchor line extraAttrs) lines
-  |> Svg.g []
+textOnCow : (Int,Int) -> String -> Svg Msg
+textOnCow (w,h) text =
+  renderTextLine (w*5//9) (h*1//2) (normalFontSize w h) "middle" text []
 
 
 renderTextLine : Int -> Int -> Int -> String -> String -> List (Svg.Attribute Msg) -> Svg Msg
@@ -140,7 +134,7 @@ renderTextLine xPos yPos fontSize anchor content extraAttrs =
                    , textAnchor anchor
                    , fontFamily normalFontFamily
                    , Svg.Attributes.fontSize (toString fontSize)
-                   , fill mediumWhite
+                   , fill normalTextColor
                    ]
                    |> List.append extraAttrs
   in

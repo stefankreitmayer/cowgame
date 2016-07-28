@@ -4,12 +4,18 @@ import Char exposing (toCode)
 import Time exposing (Time)
 
 import Model.Geometry exposing (..)
+import Model.Scene.Story exposing (..)
 
 
 type alias Scene =
-  { time : Time
-  , startTime : Maybe Time
+  { absoluteTime : Time
+  , announcement : Maybe Announcement
+  , story : Story
   , player : Player }
+
+type alias Announcement =
+  { createdAt : Time
+  , text : String }
 
 type alias Player =
   { score : Int
@@ -19,22 +25,15 @@ type alias Player =
 
 initialScene : Scene
 initialScene =
-  { time = 0
-  , startTime = Nothing
+  { absoluteTime = 0
+  , announcement = Nothing
+  , story = initialStory
   , player = Player 0 0 0 }
+
 
 playerPosX : Float
 playerPosX = 0.5
 
+
 groundPosX : Float
 groundPosX = 0.5
-
-
-hasGameStarted : Scene -> Bool
-hasGameStarted {startTime} =
-  case startTime of
-    Nothing ->
-      False
-
-    Just _ ->
-      True
