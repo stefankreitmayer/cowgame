@@ -27,10 +27,12 @@ update action ({ui,scene} as model) =
               fly delta player
           else
               player
+          textSpring' = scene.textSpring |> updateTextSpring player'
           (announcement',story') = updateAnnouncement scene
           scene' = { scene | absoluteTime = scene.absoluteTime + delta
                            , player = player'
                            , announcement = announcement'
+                           , textSpring = textSpring'
                            , story = story' }
       in
           ({ model | scene = scene' }, Cmd.none)
@@ -73,6 +75,26 @@ gravityConstant =
 isJumping : Player -> Bool
 isJumping {positionY,velocityY} =
   positionY < 0 || velocityY < 0
+
+
+updateTextSpring : Player -> Elastic -> Elastic
+updateTextSpring player ({pos,vel} as textSpring) =
+  let
+      inertia = 0.8
+      attraction = 0.05
+      vel' = if player.positionY < 0 then
+                 player.velocityY*1.05 - 0.001
+             else
+                 vel * inertia + attraction * -pos
+      pos' = pos + vel'
+      (pos'',vel'') =
+        if (abs pos')+(abs vel') < 0.0002 then
+            (0,0)
+        else
+            (pos',vel')
+  in
+      { textSpring | pos = pos''
+                   , vel = vel''}
 
 
 updateAnnouncement : Scene -> (Maybe Announcement,Story)

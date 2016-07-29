@@ -10,12 +10,17 @@ import Model.Scene.Story exposing (..)
 type alias Scene =
   { absoluteTime : Time
   , announcement : Maybe Announcement
+  , textSpring : Elastic
   , story : Story
   , player : Player }
 
 type alias Announcement =
   { createdAt : Time
   , text : String }
+
+type alias Elastic =
+  { pos : Float
+  , vel : Float }
 
 type alias Player =
   { score : Int
@@ -27,6 +32,7 @@ initialScene : Scene
 initialScene =
   { absoluteTime = 0
   , announcement = Nothing
+  , textSpring = Elastic 0 0
   , story = initialStory
   , player = Player 0 0 0 }
 

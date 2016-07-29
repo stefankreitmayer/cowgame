@@ -20,44 +20,19 @@ import Json.Encode as Json
 
 view : Model -> Html Msg
 view {ui,scene} =
-  renderPlayScreen ui.windowSize scene
-
-
-renderPlayScreen : (Int,Int) -> Scene -> Html.Html Msg
-renderPlayScreen (w,h) ({player} as scene) =
-  let
-      windowSize = (w,h)
-  in
-     div
-       []
-       [ renderPlayer windowSize player
-       , renderSvg windowSize scene
-       , renderTransparentJumpButton windowSize ]
-
-
-renderAnnouncement : (Int,Int) -> Maybe Announcement -> Html Msg
-renderAnnouncement windowSize announcement =
-  case announcement of
-    Nothing ->
-      div [] []
-
-    Just {text} ->
-      textOnCow windowSize text
-
-
-renderTransparentJumpButton : (Int,Int) -> Html.Html Msg
-renderTransparentJumpButton (w,h) =
   div
-    [ Html.Events.onClick Jump
-    , class "jumpbutton" ]
     []
+    [ renderPlayer ui.windowSize scene.player
+    , renderSvg ui.windowSize scene
+    , renderTransparentJumpButton ui.windowSize ]
 
 
 renderSvg : (Int,Int) -> Scene -> Html Msg
-renderSvg windowSize scene =
+renderSvg windowSize {announcement,textSpring,player} =
   Svg.svg
     (svgAttributes windowSize)
-    [ renderAnnouncement windowSize scene.announcement ]
+    [ renderAnnouncement windowSize announcement textSpring ]
+
 
 svgAttributes : (Int, Int) -> List (Attribute Msg)
 svgAttributes (w, h) =
@@ -70,11 +45,31 @@ svgAttributes (w, h) =
   ]
 
 
+renderAnnouncement : (Int,Int) -> Maybe Announcement -> Elastic -> Html Msg
+renderAnnouncement windowSize announcement {pos} =
+  case announcement of
+    Nothing ->
+      div [] []
+
+    Just {text} ->
+      let
+          offsetY = pos * (globalZoom windowSize) |> floor
+      in
+          textOnCow windowSize offsetY text
+
+
+renderTransparentJumpButton : (Int,Int) -> Html.Html Msg
+renderTransparentJumpButton (w,h) =
+  div
+    [ Html.Events.onClick Jump
+    , class "jumpbutton" ]
+    []
+
+
 renderPlayer : (Int,Int) -> Player -> Html Msg
 renderPlayer (w,h) {positionY} =
   let
-      wf = w |> toFloat
-      zoom = wf * 0.9 |> min ((h |> toFloat) * 1.6) |> min playerImageWidth
+      zoom = globalZoom (w,h)
       sx = zoom |> floor
       playerSY = zoom / playerAspectRatio |> floor
       x = w//2 - sx//2
@@ -102,34 +97,22 @@ renderImageFixedPosition url x y width height =
       Html.img [ srcAttr, style ] []
 
 
-normalTextColor : String
-normalTextColor = "rgba(0,0,0,.9)"
+normalFontSize : (Int,Int) -> Int
+normalFontSize windowSize =
+  (globalZoom windowSize) / 20.0 |> floor
 
 
-normalFontFamily : String
-normalFontFamily =
-  "Courier New, Courier, Monaco, monospace"
-
-
-normalFontSize : Int -> Int -> Int
-normalFontSize w h =
-  (min w h) // 20 |> min 24
-
-
-normalLineHeight : Int -> Int -> Int
-normalLineHeight w h =
-  (toFloat (normalFontSize w h)) * 1.38 |> floor
-
-
-textOnCow : (Int,Int) -> String -> Svg Msg
-textOnCow (w,h) text =
+textOnCow : (Int,Int) -> Int -> String -> Svg Msg
+textOnCow (w,h) offsetY text =
   let
       lines = String.split "|" text
-      size = normalFontSize w h
-      print index = renderTextLine (w*5//9) (h*1//2 + index * size*5//4) size "middle"
+      lineHeight = normalFontSize (w,h)
+      posY index = h * (50 - (List.length lines)) // 100 + offsetY + index * lineHeight*5//4
+      print index = renderTextLine (w//2+lineHeight*16//10) (posY index) lineHeight "middle"
   in
       List.indexedMap print lines
       |> Svg.g []
+
 
 renderTextLine : Int -> Int -> Int -> String -> String -> Svg Msg
 renderTextLine xPos yPos fontSize anchor line =
@@ -137,9 +120,7 @@ renderTextLine xPos yPos fontSize anchor line =
       attributes = [ Svg.Attributes.x <| toString xPos
                    , Svg.Attributes.y <| toString yPos
                    , textAnchor anchor
-                   , fontFamily normalFontFamily
                    , Svg.Attributes.fontSize (toString fontSize)
-                   , fill normalTextColor
                    ]
   in
       Svg.text' attributes [ Svg.text line ]
@@ -158,3 +139,8 @@ playerAspectRatio =
 groundAspectRatio : Float
 groundAspectRatio =
   646.0/5.0
+
+
+globalZoom : (Int,Int) -> Float
+globalZoom (w,h) =
+  (w |> toFloat) * 0.9 |> min ((h |> toFloat) * 1.6) |> min playerImageWidth
