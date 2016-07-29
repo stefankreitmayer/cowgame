@@ -29,9 +29,11 @@ update action ({ui,scene} as model) =
               player
           textSpring' = scene.textSpring |> updateTextSpring player'
           (announcement',story') = updateAnnouncement scene
+          opacity' = 0.4*announcement'.opacity + 0.6 * (if announcement'.visible then 1 else 0)
+          announcement'' = { announcement' | opacity = opacity' }
           scene' = { scene | absoluteTime = scene.absoluteTime + delta
                            , player = player'
-                           , announcement = announcement'
+                           , announcement = announcement''
                            , textSpring = textSpring'
                            , story = story' }
       in
@@ -97,7 +99,7 @@ updateTextSpring player ({pos,vel} as textSpring) =
                    , vel = vel''}
 
 
-updateAnnouncement : Scene -> (Maybe Announcement,Story)
+updateAnnouncement : Scene -> (Announcement,Story)
 updateAnnouncement {absoluteTime,announcement,story} =
   case nextStoryEvent story of
     Nothing ->
@@ -108,21 +110,16 @@ updateAnnouncement {absoluteTime,announcement,story} =
           isDue = absoluteTime > nextEvent.startTime
       in
           if isDue then
-              (Just (Announcement absoluteTime nextEvent.text), List.drop 1 story)
+              (Announcement absoluteTime nextEvent.text True 0, List.drop 1 story)
           else if isExpired absoluteTime announcement then
-              (Nothing,story)
+              ({ announcement | visible = False },story)
           else
               (announcement,story)
 
 
-isExpired : Time -> Maybe Announcement -> Bool
+isExpired : Time -> Announcement -> Bool
 isExpired absoluteTime announcement =
-  case announcement of
-    Nothing ->
-      False
-
-    Just announcement ->
-      absoluteTime > announcement.createdAt + 1800
+  absoluteTime > announcement.createdAt + 1800
 
 
 nextStoryEvent : Story -> Maybe StoryEvent

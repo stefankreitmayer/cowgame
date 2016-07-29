@@ -8,10 +8,9 @@ html,body{
    user-select: none;
 }
 
-div{
+svg{
    font-family: Courier, Monaco, monospace;
    font-weight: 500;
-   color: rgba(0,0,0,.9);
 }
 
 ::-moz-selection {

@@ -4,7 +4,7 @@ import Html exposing (Html,div)
 import Html.Attributes exposing (class)
 import Html.Events
 import Svg exposing (Svg,Attribute)
-import Svg.Attributes exposing (fill,fontFamily,textAnchor)
+import Svg.Attributes exposing (textAnchor)
 import Svg.Events
 import Time exposing (Time)
 import String
@@ -45,17 +45,12 @@ svgAttributes (w, h) =
   ]
 
 
-renderAnnouncement : (Int,Int) -> Maybe Announcement -> Elastic -> Html Msg
-renderAnnouncement windowSize announcement {pos} =
-  case announcement of
-    Nothing ->
-      div [] []
-
-    Just {text} ->
-      let
-          offsetY = pos * (globalZoom windowSize) |> floor
-      in
-          textOnCow windowSize offsetY text
+renderAnnouncement : (Int,Int) -> Announcement -> Elastic -> Html Msg
+renderAnnouncement windowSize {text,opacity} {pos} =
+  let
+      offsetY = pos * (globalZoom windowSize) |> floor
+  in
+      textOnCow windowSize offsetY opacity text
 
 
 renderTransparentJumpButton : (Int,Int) -> Html.Html Msg
@@ -102,16 +97,18 @@ normalFontSize windowSize =
   (globalZoom windowSize) / 20.0 |> floor
 
 
-textOnCow : (Int,Int) -> Int -> String -> Svg Msg
-textOnCow (w,h) offsetY text =
+textOnCow : (Int,Int) -> Int -> Float -> String -> Svg Msg
+textOnCow (w,h) offsetY opacity text =
   let
       lines = String.split "|" text
       lineHeight = normalFontSize (w,h)
       posY index = h * (50 - (List.length lines)) // 100 + offsetY + index * lineHeight*5//4
       print index = renderTextLine (w//2+lineHeight*16//10) (posY index) lineHeight "middle"
+      styleString = "opacity: "++(toString opacity)
   in
       List.indexedMap print lines
-      |> Svg.g []
+      |> Svg.g
+        [ Svg.Attributes.style styleString ]
 
 
 renderTextLine : Int -> Int -> Int -> String -> String -> Svg Msg

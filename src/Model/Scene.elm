@@ -9,14 +9,16 @@ import Model.Scene.Story exposing (..)
 
 type alias Scene =
   { absoluteTime : Time
-  , announcement : Maybe Announcement
+  , announcement : Announcement
   , textSpring : Elastic
   , story : Story
   , player : Player }
 
 type alias Announcement =
   { createdAt : Time
-  , text : String }
+  , text : String
+  , visible : Bool
+  , opacity : Float }
 
 type alias Elastic =
   { pos : Float
@@ -31,7 +33,7 @@ type alias Player =
 initialScene : Scene
 initialScene =
   { absoluteTime = 0
-  , announcement = Nothing
+  , announcement = Announcement 0 "" False 0
   , textSpring = Elastic 0 0
   , story = initialStory
   , player = Player 0 0 0 }
