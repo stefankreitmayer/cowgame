@@ -5,6 +5,7 @@ import Time exposing (Time)
 
 import Model.Geometry exposing (..)
 import Model.Scene.Story exposing (..)
+import Model.Scene.Obstacle exposing (..)
 
 
 type alias Scene =
@@ -12,7 +13,8 @@ type alias Scene =
   , announcement : Announcement
   , textSpring : Elastic
   , story : Story
-  , player : Player }
+  , player : Player
+  , obstacle : Obstacle }
 
 type alias Announcement =
   { createdAt : Time
@@ -36,7 +38,8 @@ initialScene =
   , announcement = Announcement 0 "" False 0
   , textSpring = Elastic 0 0
   , story = initialStory
-  , player = Player 0 0 0 }
+  , player = Player 0 0 0
+  , obstacle = Obstacle 0 0.0002 }
 
 
 playerPosX : Float

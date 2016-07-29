@@ -12,6 +12,7 @@ import String
 import Model exposing (..)
 import Model.Ui exposing (..)
 import Model.Scene exposing (..)
+import Model.Scene.Obstacle exposing (..)
 import Msg exposing (..)
 
 import VirtualDom
@@ -28,10 +29,11 @@ view {ui,scene} =
 
 
 renderSvg : (Int,Int) -> Scene -> Html Msg
-renderSvg windowSize {announcement,textSpring,player} =
+renderSvg windowSize {announcement,textSpring,player,obstacle} =
   Svg.svg
     (svgAttributes windowSize)
-    [ renderAnnouncement windowSize announcement textSpring ]
+    [ renderAnnouncement windowSize announcement textSpring
+    , renderObstacle windowSize obstacle ]
 
 
 svgAttributes : (Int, Int) -> List (Attribute Msg)
@@ -62,14 +64,14 @@ renderTransparentJumpButton (w,h) =
 
 
 renderPlayer : (Int,Int) -> Player -> Html Msg
-renderPlayer (w,h) {positionY} =
+renderPlayer windowSize {positionY} =
   let
-      zoom = globalZoom (w,h)
+      zoom = globalZoom windowSize
+      x = leftBorder windowSize |> floor
       sx = zoom |> floor
-      playerSY = zoom / playerAspectRatio |> floor
-      x = w//2 - sx//2
+      playerSY = playerSizeY windowSize
+      groundY = groundPositionY windowSize
       groundSY = zoom / groundAspectRatio |> floor
-      groundY = h//2 + playerSY//2
       playerY = groundY - playerSY + (zoom * positionY |> floor)
   in
       div
@@ -123,6 +125,23 @@ renderTextLine xPos yPos fontSize anchor line =
       Svg.text' attributes [ Svg.text line ]
 
 
+renderObstacle : (Int,Int) -> Obstacle -> Svg Msg
+renderObstacle ((w,h) as windowSize) obstacle =
+  let
+      zoom = globalZoom windowSize
+      sizeX = zoom*0.006 |> floor
+      sizeY = zoom*0.03 |> floor
+      posX = (leftBorder windowSize) + zoom*obstacle.positionX |> floor
+      posY = groundPositionY windowSize - sizeY
+  in
+      Svg.rect
+        [ Svg.Attributes.x (toString posX)
+        , Svg.Attributes.y (toString posY)
+        , Svg.Attributes.width (toString sizeX)
+        , Svg.Attributes.height (toString sizeY) ]
+        []
+
+
 playerImageWidth : Float
 playerImageWidth =
   646.0
@@ -138,6 +157,21 @@ groundAspectRatio =
   646.0/5.0
 
 
+groundPositionY : (Int,Int) -> Int
+groundPositionY ((_,h) as windowSize) =
+  h//2 + (playerSizeY windowSize)//2
+
+
+playerSizeY : (Int,Int) -> Int
+playerSizeY windowSize =
+  (globalZoom windowSize) / playerAspectRatio |> floor
+
+
 globalZoom : (Int,Int) -> Float
 globalZoom (w,h) =
   (w |> toFloat) * 0.9 |> min ((h |> toFloat) * 1.6) |> min playerImageWidth
+
+
+leftBorder : (Int,Int) -> Float
+leftBorder ((w,h) as windowSize) =
+  (toFloat w)/2 - (globalZoom windowSize)/2

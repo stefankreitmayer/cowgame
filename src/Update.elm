@@ -8,6 +8,7 @@ import Model exposing (..)
 import Model.Ui exposing (..)
 import Model.Scene exposing (..)
 import Model.Scene.Story exposing (..)
+import Model.Scene.Obstacle exposing (..)
 import Model.Geometry exposing (..)
 import Msg exposing (..)
 
@@ -31,11 +32,13 @@ update action ({ui,scene} as model) =
           (announcement',story') = updateAnnouncement scene
           opacity' = 0.4*announcement'.opacity + 0.6 * (if announcement'.visible then 1 else 0)
           announcement'' = { announcement' | opacity = opacity' }
+          obstacle' = updateObstacle delta scene.obstacle
           scene' = { scene | absoluteTime = scene.absoluteTime + delta
                            , player = player'
                            , announcement = announcement''
                            , textSpring = textSpring'
-                           , story = story' }
+                           , story = story'
+                           , obstacle = obstacle' }
       in
           ({ model | scene = scene' }, Cmd.none)
 
@@ -125,3 +128,8 @@ isExpired absoluteTime announcement =
 nextStoryEvent : Story -> Maybe StoryEvent
 nextStoryEvent story =
   List.head story
+
+
+updateObstacle : Time -> Obstacle -> Obstacle
+updateObstacle delta ({positionX,velocityX} as obstacle) =
+  { obstacle | positionX = positionX + delta*velocityX }
