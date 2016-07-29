@@ -123,11 +123,16 @@ normalLineHeight w h =
 
 textOnCow : (Int,Int) -> String -> Svg Msg
 textOnCow (w,h) text =
-  renderTextLine (w*5//9) (h*1//2) (normalFontSize w h) "middle" text []
+  let
+      lines = String.split "|" text
+      size = normalFontSize w h
+      print index = renderTextLine (w*5//9) (h*1//2 + index * size*5//4) size "middle"
+  in
+      List.indexedMap print lines
+      |> Svg.g []
 
-
-renderTextLine : Int -> Int -> Int -> String -> String -> List (Svg.Attribute Msg) -> Svg Msg
-renderTextLine xPos yPos fontSize anchor content extraAttrs =
+renderTextLine : Int -> Int -> Int -> String -> String -> Svg Msg
+renderTextLine xPos yPos fontSize anchor line =
   let
       attributes = [ Svg.Attributes.x <| toString xPos
                    , Svg.Attributes.y <| toString yPos
@@ -136,9 +141,8 @@ renderTextLine xPos yPos fontSize anchor content extraAttrs =
                    , Svg.Attributes.fontSize (toString fontSize)
                    , fill normalTextColor
                    ]
-                   |> List.append extraAttrs
   in
-      Svg.text' attributes [ Svg.text content ]
+      Svg.text' attributes [ Svg.text line ]
 
 
 playerImageWidth : Float
