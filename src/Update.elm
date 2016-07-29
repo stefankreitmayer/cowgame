@@ -23,24 +23,24 @@ update action ({ui,scene} as model) =
 
     Tick delta ->
       let
-          player = scene.player
-          player' = if isJumping player then
-              fly delta player
-          else
-              player
-          textSpring' = scene.textSpring |> updateTextSpring player'
-          (announcement',story') = updateAnnouncement scene
-          opacity' = 0.4*announcement'.opacity + 0.6 * (if announcement'.visible then 1 else 0)
-          announcement'' = { announcement' | opacity = opacity' }
-          obstacle' = updateObstacle delta scene.obstacle
-          scene' = { scene | absoluteTime = scene.absoluteTime + delta
-                           , player = player'
-                           , announcement = announcement''
-                           , textSpring = textSpring'
-                           , story = story'
-                           , obstacle = obstacle' }
+          scene' = { scene | absoluteTime = scene.absoluteTime + delta }
+          (announcement,story) = updateStory scene'
+          player = scene'.player
+          player' =
+            if isJumping player then
+                fly delta player
+            else
+                player
+          announcement' = announcement |> updateAnnouncement scene'.absoluteTime
+          textSpring' = scene'.textSpring |> updateTextSpring player'
+          obstacle' = updateObstacle delta scene'.obstacle
+          scene'' = { scene' | player = player'
+                             , announcement = announcement'
+                             , textSpring = textSpring'
+                             , story = story
+                             , obstacle = obstacle' }
       in
-          ({ model | scene = scene' }, Cmd.none)
+          ({ model | scene = scene'' }, Cmd.none)
 
     Jump ->
       let
@@ -102,32 +102,38 @@ updateTextSpring player ({pos,vel} as textSpring) =
                    , vel = vel''}
 
 
-updateAnnouncement : Scene -> (Announcement,Story)
-updateAnnouncement {absoluteTime,announcement,story} =
-  case nextStoryEvent story of
-    Nothing ->
+updateStory : Scene -> (Announcement,Story)
+updateStory ({absoluteTime,announcement,story} as scene) =
+  case story of
+    {startTime,occurrence} :: restOfStory ->
+      if absoluteTime > startTime then
+          { scene | story = restOfStory }
+          |> handleOccurrence startTime occurrence
+          |> updateStory
+          |> log "upppp"
+      else
+          (announcement,story)
+
+    _ ->
       (announcement,story)
 
-    Just nextEvent ->
-      let
-          isDue = absoluteTime > nextEvent.startTime
-      in
-          if isDue then
-              (Announcement absoluteTime nextEvent.text True 0, List.drop 1 story)
-          else if isExpired absoluteTime announcement then
-              ({ announcement | visible = False },story)
-          else
-              (announcement,story)
+
+handleOccurrence : Time -> Occurrence -> Scene -> Scene
+handleOccurrence time occurrence scene =
+  case occurrence of
+    AnnouncementOccurrence text ->
+      { scene | announcement = Announcement time text True 0 }
 
 
-isExpired : Time -> Announcement -> Bool
-isExpired absoluteTime announcement =
-  absoluteTime > announcement.createdAt + 1800
-
-
-nextStoryEvent : Story -> Maybe StoryEvent
-nextStoryEvent story =
-  List.head story
+updateAnnouncement : Time -> Announcement -> Announcement
+updateAnnouncement absoluteTime announcement =
+  let
+      isExpired = absoluteTime > announcement.createdAt + 1800
+      visible = not isExpired
+      opacity = 0.4*announcement.opacity + 0.6 * (if visible then 1 else 0)
+  in
+      { announcement | visible = visible
+                     , opacity = opacity }
 
 
 updateObstacle : Time -> Obstacle -> Obstacle
