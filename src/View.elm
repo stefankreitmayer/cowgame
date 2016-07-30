@@ -29,11 +29,11 @@ view {ui,scene} =
 
 
 renderSvg : (Int,Int) -> Scene -> Html Msg
-renderSvg windowSize {announcement,textSpring,player,obstacle} =
+renderSvg windowSize {announcement,textSpring,player,obstacles} =
   Svg.svg
     (svgAttributes windowSize)
     [ renderAnnouncement windowSize announcement textSpring
-    , renderObstacle windowSize obstacle ]
+    , renderObstacles windowSize obstacles ]
 
 
 svgAttributes : (Int, Int) -> List (Attribute Msg)
@@ -125,8 +125,14 @@ renderTextLine xPos yPos fontSize anchor line =
       Svg.text' attributes [ Svg.text line ]
 
 
+renderObstacles : (Int,Int) -> List Obstacle -> Svg Msg
+renderObstacles windowSize obstacles =
+  List.map (renderObstacle windowSize) obstacles
+  |> Svg.g []
+
+
 renderObstacle : (Int,Int) -> Obstacle -> Svg Msg
-renderObstacle ((w,h) as windowSize) obstacle =
+renderObstacle windowSize obstacle =
   let
       zoom = globalZoom windowSize
       sizeX = zoom*0.006 |> floor

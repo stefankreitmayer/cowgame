@@ -14,7 +14,7 @@ type alias Scene =
   , textSpring : Elastic
   , story : Story
   , player : Player
-  , obstacle : Obstacle }
+  , obstacles : List Obstacle }
 
 type alias Announcement =
   { createdAt : Time
@@ -39,7 +39,7 @@ initialScene =
   , textSpring = Elastic 0 0
   , story = initialStory
   , player = Player 0 0 0
-  , obstacle = Obstacle 0 0.0002 }
+  , obstacles = [] }
 
 
 playerPosX : Float

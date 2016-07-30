@@ -11,6 +11,7 @@ type alias TimedOccurrence =
 
 type Occurrence
   = AnnouncementOccurrence String
+  | ObstacleOccurrence
 
 
 initialStory : Story
@@ -34,9 +35,13 @@ convertToAbsoluteTime accumulatedTime events =
 
 initialStoryWithRelativeEntryDelays : List TimedOccurrence
 initialStoryWithRelativeEntryDelays =
-  [ announce 2000 "click to jump"
+  [ addObstacle 200
+  , addObstacle 200
+  , addObstacle 200
+  , announce 2000 "click to jump"
   , announce 3000 "oh yeah"
 
+  , addObstacle 2000
   , announce 3000 "hop over the fences"
   , announce 6000 "or crush them|if you prefer"
   , announce 2000 "really up to you"
@@ -69,3 +74,8 @@ initialStoryWithRelativeEntryDelays =
 announce : Time -> String -> TimedOccurrence
 announce startTime message =
   TimedOccurrence startTime (AnnouncementOccurrence message)
+
+
+addObstacle : Time -> TimedOccurrence
+addObstacle startTime =
+  TimedOccurrence startTime ObstacleOccurrence

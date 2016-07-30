@@ -24,7 +24,7 @@ update action ({ui,scene} as model) =
     Tick delta ->
       let
           scene' = { scene | absoluteTime = scene.absoluteTime + delta }
-          (announcement,story) = updateStory scene'
+          (obstacles,announcement,story) = updateStory scene'
           player = scene'.player
           player' =
             if isJumping player then
@@ -33,12 +33,12 @@ update action ({ui,scene} as model) =
                 player
           announcement' = announcement |> updateAnnouncement scene'.absoluteTime
           textSpring' = scene'.textSpring |> updateTextSpring player'
-          obstacle' = updateObstacle delta scene'.obstacle
+          obstacles' = updateObstacles delta obstacles
           scene'' = { scene' | player = player'
                              , announcement = announcement'
                              , textSpring = textSpring'
                              , story = story
-                             , obstacle = obstacle' }
+                             , obstacles = obstacles' }
       in
           ({ model | scene = scene'' }, Cmd.none)
 
@@ -102,20 +102,19 @@ updateTextSpring player ({pos,vel} as textSpring) =
                    , vel = vel''}
 
 
-updateStory : Scene -> (Announcement,Story)
-updateStory ({absoluteTime,announcement,story} as scene) =
+updateStory : Scene -> (List Obstacle,Announcement,Story)
+updateStory ({absoluteTime,announcement,obstacles,story} as scene) =
   case story of
     {startTime,occurrence} :: restOfStory ->
       if absoluteTime > startTime then
           { scene | story = restOfStory }
           |> handleOccurrence startTime occurrence
           |> updateStory
-          |> log "upppp"
       else
-          (announcement,story)
+          (obstacles,announcement,story)
 
     _ ->
-      (announcement,story)
+      (obstacles,announcement,story)
 
 
 handleOccurrence : Time -> Occurrence -> Scene -> Scene
@@ -123,6 +122,9 @@ handleOccurrence time occurrence scene =
   case occurrence of
     AnnouncementOccurrence text ->
       { scene | announcement = Announcement time text True 0 }
+
+    ObstacleOccurrence ->
+      { scene | obstacles = (Obstacle 0 0.0005) :: scene.obstacles }
 
 
 updateAnnouncement : Time -> Announcement -> Announcement
@@ -134,6 +136,11 @@ updateAnnouncement absoluteTime announcement =
   in
       { announcement | visible = visible
                      , opacity = opacity }
+
+
+updateObstacles : Time -> List Obstacle -> List Obstacle
+updateObstacles delta obstacles =
+  List.map (updateObstacle delta) obstacles
 
 
 updateObstacle : Time -> Obstacle -> Obstacle
