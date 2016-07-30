@@ -1,4 +1,4 @@
-module Update.Player exposing (..)
+module Update.Player exposing (stepPlayer,jump)
 
 import Time exposing (Time)
 
@@ -29,6 +29,14 @@ fly delta ({velocityY,positionY} as player) =
   in
       { player | positionY = positionY''
                , velocityY = velocityY'' }
+
+
+jump : Player -> Player
+jump player =
+  if isJumping player then
+      player
+  else
+      { player | velocityY = -0.02 }
 
 
 gravityConstant : Float

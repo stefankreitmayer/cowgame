@@ -1,4 +1,4 @@
-module Update.Story exposing (..)
+module Update.Story exposing (updateStory)
 
 import Time exposing (Time)
 
@@ -28,5 +28,5 @@ handleOccurrence time occurrence scene =
     AnnouncementOccurrence text ->
       { scene | announcement = Announcement time text True 0 }
 
-    ObstacleOccurrence ->
-      { scene | obstacles = (Obstacle 0 0.0005) :: scene.obstacles }
+    ObstacleOccurrence obstacle ->
+      { scene | obstacles = obstacle :: scene.obstacles }

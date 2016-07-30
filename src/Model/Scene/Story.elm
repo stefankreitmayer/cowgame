@@ -2,6 +2,9 @@ module Model.Scene.Story exposing (..)
 
 import Time exposing (Time)
 
+import Model.Scene.Obstacle exposing (..)
+
+
 type alias Story =
   List TimedOccurrence
 
@@ -11,7 +14,7 @@ type alias TimedOccurrence =
 
 type Occurrence
   = AnnouncementOccurrence String
-  | ObstacleOccurrence
+  | ObstacleOccurrence Obstacle
 
 
 initialStory : Story
@@ -35,27 +38,60 @@ convertToAbsoluteTime accumulatedTime events =
 
 initialStoryWithRelativeEntryDelays : List TimedOccurrence
 initialStoryWithRelativeEntryDelays =
-  [ addObstacle 200
-  , addObstacle 200
-  , addObstacle 200
-  , announce 2000 "click to jump"
+  [ announce 2000 "click to jump"
   , announce 3000 "oh yeah"
 
-  , addObstacle 2000
-  , announce 3000 "hop over the fences"
-  , announce 6000 "or crush them|if you prefer"
-  , announce 2000 "really up to you"
+  , announce 1300 "you can hop|over fences"
+  , addObstacle 1600 Fence fenceSpeed
+  , addObstacle 2500 Fence fenceSpeed
+  , addObstacle 900 Fence fenceSpeed
+  , addObstacle 1100 Fence fenceSpeed
+  , addObstacle 100 Fence fenceSpeed
+  , announce 1500 "if you want"
+  , addObstacle 700 Fence fenceSpeed
+  , addObstacle 1500 Fence fenceSpeed
+  , addObstacle 600 Fence fenceSpeed
+  , addObstacle 800 Fence fenceSpeed
 
-  , announce 8000 "careful with|those pineapples"
-  , announce 2000 "they are harmless"
+  , announce 4000 "these are|not pineapples"
+  , addObstacle 1800 Pineapple fenceSpeed
+  , addObstacle 900 Pineapple fenceSpeed
+  , addObstacle 200 Pineapple fenceSpeed
+  , addObstacle 400 Pineapple fenceSpeed
+  , addObstacle 450 Pineapple fenceSpeed
+  , addObstacle 200 Pineapple fenceSpeed
+  , addObstacle 500 Pineapple fenceSpeed
+  , addObstacle 800 Pineapple fenceSpeed
+  , announce 1000 "i don't know|what they are"
+  , addObstacle 300 Pineapple fenceSpeed
+  , addObstacle 450 Pineapple fenceSpeed
+  , announce 500 "but they seem harmless"
+  , addObstacle 900 Pineapple fenceSpeed
+  , addObstacle 200 Pineapple fenceSpeed
+  , addObstacle 400 Pineapple fenceSpeed
+  , addObstacle 450 Pineapple fenceSpeed
 
   , announce 8000 "a huge wave of|zombies is approaching"
-  , announce 4000 "brains|brains"
+  , addObstacle 210 Zombie (zombieSpeed*1.19)
+  , addObstacle 230 Zombie (zombieSpeed*1.19)
+  , addObstacle 340 Zombie (zombieSpeed*1.18)
+  , addObstacle 170 Zombie (zombieSpeed*1.13)
+  , addObstacle 210 Zombie (zombieSpeed*1.12)
+  , addObstacle 110 Zombie (zombieSpeed*1.02)
+  , addObstacle 130 Zombie (zombieSpeed*1.13)
+  , addObstacle 380 Zombie (zombieSpeed*1.12)
+  , addObstacle 150 Zombie (zombieSpeed*1.12)
+  , addObstacle 330 Zombie (zombieSpeed*1.16)
+  , addObstacle 190 Zombie (zombieSpeed*1.15)
+  , addObstacle 140 Zombie (zombieSpeed*1.14)
+  , addObstacle 250 Zombie (zombieSpeed*1.13)
+  , addObstacle 110 Zombie (zombieSpeed*1.12)
+  , addObstacle 250 Zombie (zombieSpeed*1.11)
+  , addObstacle 510 Zombie (zombieSpeed*1.10)
+  , announce 1000 "brains|brains"
 
   , announce 8000 "you just earned|16777216 points"
-  , announce 2000 "not really|there are no zombies"
-  , announce 2000 "but imagine|you won those points"
-  , announce 4000 "would you wish|to donate them?"
+  , announce 4000 "would you like|to donate them?"
 
   , announce 8000 "these balloons|are for you"
 
@@ -76,6 +112,17 @@ announce startTime message =
   TimedOccurrence startTime (AnnouncementOccurrence message)
 
 
-addObstacle : Time -> TimedOccurrence
-addObstacle startTime =
-  TimedOccurrence startTime ObstacleOccurrence
+addObstacle : Time -> ObstacleFace -> Float -> TimedOccurrence
+addObstacle startTime face speed =
+  let
+      obstacle = Obstacle 0 speed face
+  in
+      TimedOccurrence startTime (ObstacleOccurrence obstacle)
+
+
+fenceSpeed : Float
+fenceSpeed = 0.0004
+
+
+zombieSpeed : Float
+zombieSpeed = 0.0001

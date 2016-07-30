@@ -13,6 +13,10 @@ import Model exposing (..)
 import Model.Ui exposing (..)
 import Model.Scene exposing (..)
 import Model.Scene.Obstacle exposing (..)
+
+import View.Coordinates exposing (..)
+import View.Obstacle exposing (..)
+
 import Msg exposing (..)
 
 import VirtualDom
@@ -123,61 +127,3 @@ renderTextLine xPos yPos fontSize anchor line =
                    ]
   in
       Svg.text' attributes [ Svg.text line ]
-
-
-renderObstacles : (Int,Int) -> List Obstacle -> Svg Msg
-renderObstacles windowSize obstacles =
-  List.map (renderObstacle windowSize) obstacles
-  |> Svg.g []
-
-
-renderObstacle : (Int,Int) -> Obstacle -> Svg Msg
-renderObstacle windowSize obstacle =
-  let
-      zoom = globalZoom windowSize
-      sizeX = zoom*0.006 |> floor
-      sizeY = zoom*0.03 |> floor
-      posX = (leftBorder windowSize) + zoom*obstacle.positionX |> floor
-      posY = groundPositionY windowSize - sizeY
-  in
-      Svg.rect
-        [ Svg.Attributes.x (toString posX)
-        , Svg.Attributes.y (toString posY)
-        , Svg.Attributes.width (toString sizeX)
-        , Svg.Attributes.height (toString sizeY) ]
-        []
-
-
-playerImageWidth : Float
-playerImageWidth =
-  646.0
-
-
-playerAspectRatio : Float
-playerAspectRatio =
-  646.0/328.0
-
-
-groundAspectRatio : Float
-groundAspectRatio =
-  646.0/5.0
-
-
-groundPositionY : (Int,Int) -> Int
-groundPositionY ((_,h) as windowSize) =
-  h//2 + (playerSizeY windowSize)//2
-
-
-playerSizeY : (Int,Int) -> Int
-playerSizeY windowSize =
-  (globalZoom windowSize) / playerAspectRatio |> floor
-
-
-globalZoom : (Int,Int) -> Float
-globalZoom (w,h) =
-  (w |> toFloat) * 0.9 |> min ((h |> toFloat) * 1.6) |> min playerImageWidth
-
-
-leftBorder : (Int,Int) -> Float
-leftBorder ((w,h) as windowSize) =
-  (toFloat w)/2 - (globalZoom windowSize)/2

@@ -1,4 +1,4 @@
-module Update.Obstacle exposing (..)
+module Update.Obstacle exposing (stepObstacles)
 
 import Time exposing (Time)
 

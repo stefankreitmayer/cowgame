@@ -34,11 +34,7 @@ update action ({ui,scene} as model) =
 
     Jump ->
       let
-          player = scene.player
-          player' = if isJumping player then
-                        player
-                    else
-                        { player | velocityY = -0.02 }
+          player' = scene.player |> jump
           scene' = { scene | player = player' }
           model' = { model | scene = scene' }
       in
