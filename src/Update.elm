@@ -1,15 +1,15 @@
 module Update exposing (..)
 
-import Set exposing (Set)
-import Char
 import Time exposing (Time)
 
 import Model exposing (..)
 import Model.Ui exposing (..)
 import Model.Scene exposing (..)
-import Model.Scene.Story exposing (..)
-import Model.Scene.Obstacle exposing (..)
-import Model.Geometry exposing (..)
+
+import Update.Story exposing (..)
+import Update.Player exposing (..)
+import Update.Obstacle exposing (..)
+
 import Msg exposing (..)
 
 import Debug exposing (log)
@@ -24,23 +24,13 @@ update action ({ui,scene} as model) =
     Tick delta ->
       let
           scene' = { scene | absoluteTime = scene.absoluteTime + delta }
-          (obstacles,announcement,story) = updateStory scene'
-          player = scene'.player
-          player' =
-            if isJumping player then
-                fly delta player
-            else
-                player
-          announcement' = announcement |> updateAnnouncement scene'.absoluteTime
-          textSpring' = scene'.textSpring |> updateTextSpring player'
-          obstacles' = updateObstacles delta obstacles
-          scene'' = { scene' | player = player'
-                             , announcement = announcement'
-                             , textSpring = textSpring'
-                             , story = story
-                             , obstacles = obstacles' }
+                 |> updateStory
+                 |> stepPlayer delta
+                 |> updateAnnouncement
+                 |> stepTextSpring
+                 |> stepObstacles delta
       in
-          ({ model | scene = scene'' }, Cmd.none)
+          ({ model | scene = scene' }, Cmd.none)
 
     Jump ->
       let
@@ -58,33 +48,23 @@ update action ({ui,scene} as model) =
       (model, Cmd.none)
 
 
-fly : Time -> Player -> Player
-fly delta ({velocityY,positionY} as player) =
+updateAnnouncement : Scene -> Scene
+updateAnnouncement ({announcement,absoluteTime} as scene) =
   let
-      velocityY' = velocityY + gravityConstant * delta
-      positionY' = positionY + velocityY' |> min 0
-      (positionY'', velocityY'') = if positionY' < 0 then
-                                       (positionY',velocityY')
-                                   else
-                                       (0,0)
+      isExpired = absoluteTime > announcement.createdAt + 1800
+      visible = not isExpired
+      opacity = 0.4*announcement.opacity + 0.6 * (if visible then 1 else 0)
+      announcement' = { announcement | visible = visible
+                                     , opacity = opacity }
   in
-      { player | positionY = positionY''
-               , velocityY = velocityY'' }
+      { scene | announcement = announcement' }
 
 
-gravityConstant : Float
-gravityConstant =
-  0.00007
-
-
-isJumping : Player -> Bool
-isJumping {positionY,velocityY} =
-  positionY < 0 || velocityY < 0
-
-
-updateTextSpring : Player -> Elastic -> Elastic
-updateTextSpring player ({pos,vel} as textSpring) =
+stepTextSpring : Scene -> Scene
+stepTextSpring ({textSpring,player} as scene) =
   let
+      pos = textSpring.pos
+      vel = textSpring.vel
       inertia = 0.8
       attraction = 0.05
       vel' = if player.positionY < 0 then
@@ -97,52 +77,7 @@ updateTextSpring player ({pos,vel} as textSpring) =
             (0,0)
         else
             (pos',vel')
+      textSpring' = { textSpring | pos = pos''
+                                 , vel = vel'' }
   in
-      { textSpring | pos = pos''
-                   , vel = vel''}
-
-
-updateStory : Scene -> (List Obstacle,Announcement,Story)
-updateStory ({absoluteTime,announcement,obstacles,story} as scene) =
-  case story of
-    {startTime,occurrence} :: restOfStory ->
-      if absoluteTime > startTime then
-          { scene | story = restOfStory }
-          |> handleOccurrence startTime occurrence
-          |> updateStory
-      else
-          (obstacles,announcement,story)
-
-    _ ->
-      (obstacles,announcement,story)
-
-
-handleOccurrence : Time -> Occurrence -> Scene -> Scene
-handleOccurrence time occurrence scene =
-  case occurrence of
-    AnnouncementOccurrence text ->
-      { scene | announcement = Announcement time text True 0 }
-
-    ObstacleOccurrence ->
-      { scene | obstacles = (Obstacle 0 0.0005) :: scene.obstacles }
-
-
-updateAnnouncement : Time -> Announcement -> Announcement
-updateAnnouncement absoluteTime announcement =
-  let
-      isExpired = absoluteTime > announcement.createdAt + 1800
-      visible = not isExpired
-      opacity = 0.4*announcement.opacity + 0.6 * (if visible then 1 else 0)
-  in
-      { announcement | visible = visible
-                     , opacity = opacity }
-
-
-updateObstacles : Time -> List Obstacle -> List Obstacle
-updateObstacles delta obstacles =
-  List.map (updateObstacle delta) obstacles
-
-
-updateObstacle : Time -> Obstacle -> Obstacle
-updateObstacle delta ({positionX,velocityX} as obstacle) =
-  { obstacle | positionX = positionX + delta*velocityX }
+      { scene | textSpring = textSpring' }

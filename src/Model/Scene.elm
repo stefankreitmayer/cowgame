@@ -3,7 +3,6 @@ module Model.Scene exposing (..)
 import Char exposing (toCode)
 import Time exposing (Time)
 
-import Model.Geometry exposing (..)
 import Model.Scene.Story exposing (..)
 import Model.Scene.Obstacle exposing (..)
 
