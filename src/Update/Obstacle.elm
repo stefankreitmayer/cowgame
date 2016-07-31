@@ -7,21 +7,29 @@ import Model.Scene.Obstacle exposing (..)
 
 
 stepObstacles : Time -> Scene -> Scene
-stepObstacles delta ({obstacles} as scene) =
+stepObstacles delta ({obstacles,player} as scene) =
   let
-      obstacles' = List.map (stepObstacle delta) obstacles
-                 |> List.filter (\obstacle -> not obstacle.expired)
+      obstacles' = List.map (stepObstacle delta player) obstacles
+                 |> List.filter (\obstacle -> obstacle.status==Alive)
   in
       { scene | obstacles = obstacles' }
 
 
-stepObstacle : Time -> Obstacle -> Obstacle
-stepObstacle delta ({positionX,velocityX} as obstacle) =
+stepObstacle : Time -> Player -> Obstacle -> Obstacle
+stepObstacle delta player ({positionX,velocityX} as obstacle) =
   let
       positionX' = positionX + delta*velocityX
-      expired = positionX > 1
+      crushed = isUnderUdder positionX && player.positionY==0
+      status = if positionX > 1 then
+                   Expired
+               else if crushed then
+                   Dead
+               else
+                   obstacle.status
       fadeIn = 30.0
-      opacity = if positionX < 1.0/fadeIn then
+      opacity = if status==Dead then
+                    0
+                else if positionX < 1.0/fadeIn then
                     positionX * fadeIn
                 else if positionX < (1.0-1.0/fadeIn) then
                     1.0
@@ -29,5 +37,10 @@ stepObstacle delta ({positionX,velocityX} as obstacle) =
                     (1-positionX) * fadeIn
   in
       { obstacle | positionX = positionX'
-                 , expired = expired
+                 , status = status
                  , opacity = opacity }
+
+
+isUnderUdder : Float -> Bool
+isUnderUdder posX =
+  posX > 0.78 && posX < 0.9

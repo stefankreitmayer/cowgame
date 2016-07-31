@@ -47,7 +47,7 @@ update action ({ui,scene} as model) =
 updateAnnouncement : Scene -> Scene
 updateAnnouncement ({announcement,absoluteTime} as scene) =
   let
-      isExpired = absoluteTime > announcement.createdAt + 1800
+      isExpired = absoluteTime > announcement.createdAt + announcementDuration
       visible = not isExpired
       opacity = 0.4*announcement.opacity + 0.6 * (if visible then 1 else 0)
       announcement' = { announcement | visible = visible
@@ -77,3 +77,7 @@ stepTextSpring ({textSpring,player} as scene) =
                                  , vel = vel'' }
   in
       { scene | textSpring = textSpring' }
+
+
+announcementDuration : Time
+announcementDuration = 1800
