@@ -19,12 +19,17 @@ renderParticle : (Int,Int) -> Particle -> Svg Msg
 renderParticle windowSize particle =
   let
       zoom = globalZoom windowSize
+      length = zoom*0.01
+      dx = (cos particle.angle) * length/2
+      dy = (sin particle.angle) * length/2
       x = (leftBorder windowSize) + zoom*particle.position.x
       y = (groundPositionY windowSize |> toFloat) + zoom*particle.position.y
-      r = zoom*0.01 |> round
+      strokeWidth = length*0.7 |> toString
   in
-      Svg.circle
-        [ Svg.Attributes.cx (toString x)
-        , Svg.Attributes.cy (toString y)
-        , Svg.Attributes.r (toString r) ]
+      Svg.line
+        [ Svg.Attributes.x1 (toString (x+dx))
+        , Svg.Attributes.y1 (toString (y+dy))
+        , Svg.Attributes.x2 (toString (x-dx))
+        , Svg.Attributes.y2 (toString (y-dy))
+        , Svg.Attributes.style ("stroke:rgb(0,0,0);stroke-width:"++strokeWidth) ]
         []

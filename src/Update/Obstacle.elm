@@ -3,6 +3,7 @@ module Update.Obstacle exposing (stepObstacles)
 import Time exposing (Time)
 
 import Model.Scene exposing (..)
+import Model.Scene.Common exposing (..)
 import Model.Scene.Obstacle exposing (..)
 import Model.Scene.Particle exposing (..)
 
@@ -44,11 +45,6 @@ stepObstacle delta player ({positionX,velocityX} as obstacle) =
       { obstacle | positionX = positionX'
                  , status = status
                  , opacity = opacity }
-
-
-isUnderUdder : Float -> Bool
-isUnderUdder posX =
-  posX > 0.78 && posX < 0.9
 
 
 explodeIfDead : Time -> Obstacle -> Maybe (List Particle)

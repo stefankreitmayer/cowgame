@@ -15,7 +15,8 @@ type alias Scene =
   , story : Story
   , player : Player
   , obstacles : List Obstacle
-  , particles : List Particle }
+  , particles : List Particle
+  , gameoverTime : Maybe Time }
 
 type alias Announcement =
   { createdAt : Time
@@ -41,4 +42,5 @@ initialScene =
   , story = initialStory
   , player = Player 0 0 0
   , obstacles = []
-  , particles = [] }
+  , particles = []
+  , gameoverTime = Nothing }

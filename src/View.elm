@@ -28,7 +28,7 @@ view : Model -> Html Msg
 view {ui,scene} =
   div
     []
-    [ renderPlayer ui.windowSize scene.player
+    [ renderPlayer ui.windowSize scene
     , renderSvg ui.windowSize scene
     , renderTransparentJumpButton ui.windowSize ]
 
@@ -69,8 +69,8 @@ renderTransparentJumpButton (w,h) =
     []
 
 
-renderPlayer : (Int,Int) -> Player -> Html Msg
-renderPlayer windowSize {positionY} =
+renderPlayer : (Int,Int) -> Scene -> Html Msg
+renderPlayer windowSize {player,absoluteTime,gameoverTime} =
   let
       zoom = globalZoom windowSize
       x = leftBorder windowSize |> floor
@@ -78,10 +78,17 @@ renderPlayer windowSize {positionY} =
       playerSY = playerSizeY windowSize
       groundY = groundPositionY windowSize
       groundSY = zoom / groundAspectRatio |> floor
-      playerY = groundY - playerSY + (zoom * positionY |> floor)
+      playerY = groundY - playerSY + (zoom * player.positionY |> floor)
+      opacity =
+        case gameoverTime of
+          Nothing ->
+            "1"
+
+          Just time ->
+            (1.0 - (absoluteTime - time) / 5000) |> max 0 |> toString
   in
       div
-        []
+        [ Html.Attributes.style [("opacity",opacity)] ]
         [ renderImageFixedPosition "images/cow.gif" x playerY sx playerSY
         , renderImageFixedPosition "images/ground.gif" x groundY sx groundSY ]
 

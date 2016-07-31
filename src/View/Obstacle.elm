@@ -40,7 +40,7 @@ renderObstacle windowSize obstacle =
 renderFence : Int -> Int -> Float -> Svg Msg
 renderFence posX groundPosY zoom =
   let
-      sizeX = zoom*0.006 |> floor
+      sizeX = zoom*0.007 |> floor
       sizeY = zoom*0.03 |> floor
   in
       Svg.rect

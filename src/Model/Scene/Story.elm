@@ -15,6 +15,7 @@ type alias TimedOccurrence =
 type Occurrence
   = AnnouncementOccurrence String
   | ObstacleOccurrence Obstacle
+  | GameoverOccurrence
 
 
 initialStory : Story
@@ -42,28 +43,28 @@ initialStoryWithRelativeEntryDelays =
   , announce 3000 "oh yeah"
 
   , addObstacle 1600 Fence fenceSpeed
-  , addObstacle 800 Fence fenceSpeed
   , addObstacle 1300 Fence fenceSpeed
-  , announce 2200 "ain't no fence"
-  , announce 2000 "gonna ever|hold u back"
-  , addObstacle 1100 Fence fenceSpeed
-  , addObstacle 100 Fence fenceSpeed
-  , addObstacle 700 Fence fenceSpeed
-  , addObstacle 1500 Fence fenceSpeed
-  , announce 500 "you are simply"
-  , addObstacle 900 Fence fenceSpeed
   , addObstacle 800 Fence fenceSpeed
-  , addObstacle 700 Fence fenceSpeed
-  , announce 500 "too awesome"
+  , announce 2900 "ain't no fence"
+  , announce 2000 "gonna hold u back"
+  , addObstacle 1100 Fence fenceSpeed
   , addObstacle 1500 Fence fenceSpeed
+  , addObstacle 900 Fence fenceSpeed
+  , addObstacle 100 Fence fenceSpeed
+  , addObstacle 900 Fence fenceSpeed
+  , announce 2900 "you are simply"
+  , addObstacle 700 Fence fenceSpeed
+  , announce 2400 "too awesome"
 
-  , announce 4000 "ain't no poop"
-  , addObstacle 1000 Pineapple fenceSpeed
+  , announce 4000 "ain't no mess"
+  , addObstacle 300 Pineapple fenceSpeed
+  , addObstacle 450 Pineapple fenceSpeed
   , addObstacle 900 Pineapple fenceSpeed
   , addObstacle 200 Pineapple fenceSpeed
   , addObstacle 400 Pineapple fenceSpeed
+  , addObstacle 1000 Pineapple fenceSpeed
   , addObstacle 450 Pineapple fenceSpeed
-  , announce 2000 "ever gonna touch you"
+  , announce 2500 "ever mess|with your head"
   , addObstacle 200 Pineapple fenceSpeed
   , addObstacle 500 Pineapple fenceSpeed
   , addObstacle 800 Pineapple fenceSpeed
@@ -73,8 +74,9 @@ initialStoryWithRelativeEntryDelays =
   , addObstacle 200 Pineapple fenceSpeed
   , addObstacle 400 Pineapple fenceSpeed
   , addObstacle 450 Pineapple fenceSpeed
+  , announce 2900 "coz you're a pro"
 
-  , announce 8000 "a huge wave of|zombies is approaching"
+  , announce 7000 "a huge wave|of zombies"
   , addObstacle 210 Zombie (zombieSpeed*1.19)
   , addObstacle 230 Zombie (zombieSpeed*1.19)
   , addObstacle 340 Zombie (zombieSpeed*1.18)
@@ -91,18 +93,16 @@ initialStoryWithRelativeEntryDelays =
   , addObstacle 110 Zombie (zombieSpeed*1.12)
   , addObstacle 250 Zombie (zombieSpeed*1.11)
   , addObstacle 510 Zombie (zombieSpeed*1.10)
+  , announce 0 "so what?"
   , addObstacle 170 Zombie (zombieSpeed*1.13)
   , addObstacle 210 Zombie (zombieSpeed*1.12)
-  , announce 0 "ain't no problem"
-  , announce 3500 "ain't no brains|down there"
 
-  , announce 5000 "you just earned|16777216 points"
-  , announce 2000 "not saying|you need those"
-  , announce 8000 "anyway - congratulations"
+  , announce 3500 "zombies schmombies"
 
-  , announce 3000 "this was fun"
-  , announce 3000 "thank you|holy cow"
+  , announce 7000 "alrighty|holy cow"
+  , announce 3000 "that was lovely|thanks"
   , announce 3000 "see you soon"
+  , gameover 1000
   ]
 
 
@@ -117,6 +117,11 @@ addObstacle startTime face speed =
       obstacle = Obstacle 0 speed face Alive 0
   in
       TimedOccurrence startTime (ObstacleOccurrence obstacle)
+
+
+gameover : Time -> TimedOccurrence
+gameover startTime =
+  TimedOccurrence startTime GameoverOccurrence
 
 
 fenceSpeed : Float

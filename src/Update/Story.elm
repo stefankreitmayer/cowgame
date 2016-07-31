@@ -30,3 +30,6 @@ handleOccurrence time occurrence scene =
 
     ObstacleOccurrence obstacle ->
       { scene | obstacles = obstacle :: scene.obstacles }
+
+    GameoverOccurrence ->
+      { scene | gameoverTime = Just time }
