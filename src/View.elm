@@ -16,6 +16,7 @@ import Model.Scene.Obstacle exposing (..)
 
 import View.Coordinates exposing (..)
 import View.Obstacle exposing (..)
+import View.Particle exposing (..)
 
 import Msg exposing (..)
 
@@ -33,11 +34,12 @@ view {ui,scene} =
 
 
 renderSvg : (Int,Int) -> Scene -> Html Msg
-renderSvg windowSize {announcement,textSpring,player,obstacles} =
+renderSvg windowSize {announcement,textSpring,player,obstacles,particles} =
   Svg.svg
     (svgAttributes windowSize)
     [ renderAnnouncement windowSize announcement textSpring
-    , renderObstacles windowSize obstacles ]
+    , renderObstacles windowSize obstacles
+    , renderParticles windowSize particles ]
 
 
 svgAttributes : (Int, Int) -> List (Attribute Msg)

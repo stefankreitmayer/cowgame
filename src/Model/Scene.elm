@@ -5,6 +5,7 @@ import Time exposing (Time)
 
 import Model.Scene.Story exposing (..)
 import Model.Scene.Obstacle exposing (..)
+import Model.Scene.Particle exposing (..)
 
 
 type alias Scene =
@@ -13,7 +14,8 @@ type alias Scene =
   , textSpring : Elastic
   , story : Story
   , player : Player
-  , obstacles : List Obstacle }
+  , obstacles : List Obstacle
+  , particles : List Particle }
 
 type alias Announcement =
   { createdAt : Time
@@ -38,12 +40,5 @@ initialScene =
   , textSpring = Elastic 0 0
   , story = initialStory
   , player = Player 0 0 0
-  , obstacles = [] }
-
-
-playerPosX : Float
-playerPosX = 0.5
-
-
-groundPosX : Float
-groundPosX = 0.5
+  , obstacles = []
+  , particles = [] }

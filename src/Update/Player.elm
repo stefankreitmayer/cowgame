@@ -3,6 +3,7 @@ module Update.Player exposing (stepPlayer,jump)
 import Time exposing (Time)
 
 import Model.Scene exposing (..)
+import Model.Scene.Common exposing (..)
 
 
 stepPlayer : Time -> Scene -> Scene
@@ -37,11 +38,6 @@ jump player =
       player
   else
       { player | velocityY = -0.02 }
-
-
-gravityConstant : Float
-gravityConstant =
-  0.00007
 
 
 isJumping : Player -> Bool

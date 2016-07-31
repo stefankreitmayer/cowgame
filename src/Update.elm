@@ -9,6 +9,7 @@ import Model.Scene exposing (..)
 import Update.Story exposing (..)
 import Update.Player exposing (..)
 import Update.Obstacle exposing (..)
+import Update.Particle exposing (..)
 
 import Msg exposing (..)
 
@@ -29,6 +30,7 @@ update action ({ui,scene} as model) =
                  |> updateAnnouncement
                  |> stepTextSpring
                  |> stepObstacles delta
+                 |> stepParticles delta
       in
           ({ model | scene = scene' }, Cmd.none)
 

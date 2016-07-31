@@ -1,7 +1,7 @@
 module View.Obstacle exposing (renderObstacles)
 
 import Svg exposing (Svg,Attribute)
-import Svg.Attributes exposing (textAnchor)
+import Svg.Attributes
 
 import Model.Scene.Obstacle exposing (..)
 import View.Coordinates exposing (..)

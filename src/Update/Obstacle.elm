@@ -4,15 +4,20 @@ import Time exposing (Time)
 
 import Model.Scene exposing (..)
 import Model.Scene.Obstacle exposing (..)
+import Model.Scene.Particle exposing (..)
 
 
 stepObstacles : Time -> Scene -> Scene
 stepObstacles delta ({obstacles,player} as scene) =
   let
-      obstacles' = List.map (stepObstacle delta player) obstacles
-                 |> List.filter (\obstacle -> obstacle.status==Alive)
+      obstacles' = obstacles |> List.map (stepObstacle delta player)
+      newParticles =
+        List.filterMap (explodeIfDead scene.absoluteTime) obstacles'
+        |> List.concat
+      aliveObstacles = obstacles' |> List.filter (\ob -> ob.status==Alive)
   in
-      { scene | obstacles = obstacles' }
+      { scene | obstacles = aliveObstacles
+              , particles = scene.particles ++ newParticles }
 
 
 stepObstacle : Time -> Player -> Obstacle -> Obstacle
@@ -44,3 +49,13 @@ stepObstacle delta player ({positionX,velocityX} as obstacle) =
 isUnderUdder : Float -> Bool
 isUnderUdder posX =
   posX > 0.78 && posX < 0.9
+
+
+explodeIfDead : Time -> Obstacle -> Maybe (List Particle)
+explodeIfDead absoluteTime obstacle =
+  case obstacle.status of
+    Dead ->
+      Just (explode absoluteTime obstacle)
+
+    _ ->
+      Nothing
