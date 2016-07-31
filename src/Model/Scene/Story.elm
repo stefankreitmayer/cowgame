@@ -115,7 +115,7 @@ announce startTime message =
 addObstacle : Time -> ObstacleFace -> Float -> TimedOccurrence
 addObstacle startTime face speed =
   let
-      obstacle = Obstacle 0 speed face
+      obstacle = Obstacle 0 speed face False 0
   in
       TimedOccurrence startTime (ObstacleOccurrence obstacle)
 

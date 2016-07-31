@@ -21,16 +21,20 @@ renderObstacle windowSize obstacle =
       zoom = globalZoom windowSize
       posX = (leftBorder windowSize) + zoom*obstacle.positionX |> floor
       groundPosY = groundPositionY windowSize
+      child =
+        case obstacle.face of
+          Fence ->
+            renderFence posX groundPosY zoom
+
+          Pineapple ->
+            renderPineapple posX groundPosY zoom
+
+          Zombie ->
+            renderZombie posX groundPosY zoom
   in
-      case obstacle.face of
-        Fence ->
-          renderFence posX groundPosY zoom
-
-        Pineapple ->
-          renderPineapple posX groundPosY zoom
-
-        Zombie ->
-          renderZombie posX groundPosY zoom
+      Svg.g
+        [ Svg.Attributes.opacity (toString obstacle.opacity) ]
+        [ child ]
 
 
 renderFence : Int -> Int -> Float -> Svg Msg
